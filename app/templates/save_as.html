@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title> New Document </title>
+    <meta name="Generator" content="EditPlus">
+    <meta name="Author" content="">
+    <meta name="Keywords" content="">
+    <meta name="Description" content="">
+    <script src="./jquery-3.2.1.js" type="text/javascript"></script>
+    <script language="JavaScript">
+    //<!--
+        function downLoadImage(imagePathURL){
+            //如果中间IFRAME不存在，则添加
+            if(!document.getElementById("_SAVEASIMAGE_TEMP_FRAME"))
+                jQuery('<iframe style="display:none;" id="_SAVEASIMAGE_TEMP_FRAME" \
+                    name="_SAVEASIMAGE_TEMP_FRAME" onload="_doSaveAsImage();" \
+                    width="0" height="0" src="about:blank"></iframe>').appendTo("body");
+            if(document.all._SAVEASIMAGE_TEMP_FRAME.src!=imagePathURL){
+                //图片地址发生变化，加载图片
+                document.all._SAVEASIMAGE_TEMP_FRAME.src = imagePathURL;
+            }else{
+                //图片地址没有变化，直接另存为
+                _doSaveAsImage();
+            }
+        }
+        function _doSaveAsImage(){
+            if(document.all._SAVEASIMAGE_TEMP_FRAME.src!="about:blank")
+                document.frames("_SAVEASIMAGE_TEMP_FRAME").document.execCommand("SaveAs");
+        }
+    //-->
+    function getimg() //另存为存放在服务器上图片到本地的方法
+    {
+        event.returnValue=false;
+        show.window.location.href=imgSrc.src;
+        timer=setInterval(checkload,100)
+    }
+     
+    function checkload()
+    {
+        if(show.readyState!="complete")
+        {
+            //调用document.execCommand方法，'Saveas'表示打开文件另存为对话框命令
+            show.document.execCommand('SaveAs');
+            clearInterval(timer)
+        }
+    }  
+    </script>
+</head>
+<body>
+<input type="button" value="download image"
+onclick="downLoadImage('http://www.jb51.net/images/logo.gif');">
+<img id="imgSrc" width="320px" height="200px" src="test.bmp" alt=""/></br>
+<input id="btnSaveAs" type="button" value="另存为上图" onclick="getimg()"/>
+<iframe src="" name="show"  style="width:0;height:0"></iframe>
+</body>
+</html>

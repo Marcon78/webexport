@@ -19,18 +19,48 @@
             outline: 0;
         }
     </style>
-    <script src="../static/js/jquery-3.2.1.js" type="text/javascript"></script>
-    <script src="../static/js/tableExport.js" type="text/javascript"></script>
-    <script src="../static/js/jquery.base64.js" type="text/javascript"></script>
+    <script type="text/javascript" src="../static/js/jquery-3.2.1.js"></script>
+    <!--
+    <script type="text/javascript" src="../static/js/tableExport.js"></script>
+    <script type="text/javascript" src="../static/js/jquery.base64.js"></script>
+    -->
+    <script type="text/javascript" src="../static/js/js-xlsx/xlsx.core.min.js"></script>
+    <script type="text/javascript" src="../static/js/FileSaver/FileSaver.min.js"></script>
+    <script type="text/javascript" src="../static/js/jsPDF/jspdf.min.js"></script>
+    <script type="text/javascript" src="../static/js/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+    <script type="text/javascript" src="../static/js/html2canvas.min.js"></script>
+    <script type="text/javascript" src="../static/js/tableExport_hhurz.js"></script>
     <script type="text/javascript">
         $(function(){
-            $("#btnExport").click(function(){               
-                        $('#stats_datatable').tableExport({
-                        type:'excel',
-                        escape:'false',
-                        fileName: 'UV_statistic_table'
-                        });
-                    });
+            $("#front_export_xls").click(function(){
+                var name=prompt("请输入文件名", "NewFile");
+                $("#stats_datatable").tableExport({
+                    type:'excel',
+                    excelFileFormat:'xmlss',
+                    escape:'false',
+                    fileName: name
+                });
+            });
+
+            $("#front_export_pdf").click(function(){
+                var name=prompt("请输入文件名", "NewFile");
+                // $("#stats_datatable").tableExport({
+                //     type:'pdf',
+                //     jspdf: {
+                //         orientation: 'p',
+                //         margins: {left:20, top:10},
+                //         autotable: false
+                //     }
+                // });
+                $("#stats_datatable").tableExport({
+                    type: 'pdf',
+                    jspdf: {
+                        orientation: 'l',
+                        margins: {right: 10, left: 10, top: 40, bottom: 40},
+                        autotable: {tableWidth: 'auto'}
+                    }
+                });
+            });
         });
     </script>
 </head>
@@ -40,11 +70,8 @@
     <button type="button">&#10084;</button>
     <button type="button">&#9813;</button>
     <button type="button">print</button>
-    <button type="button" id="btnExport">export front</button>
-    <button type="button">export back</button>
-    <a href="#" id="buttonExportData" class="ui-btn ui-btn-inline ui-mini ui-shadow ui-corner-all" onclick ="$('#table-name').tableExport({type:'excel', separator:';', escape:'false'});">
-            Export XLS
-    </a>        
+    <button type="button" id="front_export_xls">front export xls</button>
+    <button type="button" id="front_export_pdf">front export pdf</button>        
     <table id="stats_datatable">
         <tr>
             <th>#</th>
