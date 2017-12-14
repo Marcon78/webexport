@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <style type="text/css">
+    <link rel="stylesheet" href="http://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+    <!-- <style type="text/css">
         body { padding:0; margin:0; font:normal 12px/24px "\5B8B\4F53"; color:#444; }
         table { width:800px; border:0; margin:100px auto 0; border-collapse:collapse; border-spacing:0;}
         table th { background:#0090D7; font-weight:normal; text-align:center; line-height:30px; font-size:14px; color:#FFF;}
@@ -18,20 +19,97 @@
         button:active {
             outline: 0;
         }
-    </style>
+    </style> -->
     <script type="text/javascript" src="../static/js/jquery-3.2.1.js"></script>
+    <script type="text/javascript" src="../static/js/jquery.dataTables.js"></script>
+    <!-- <script type="text/javascript" src="http://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script> -->
     <!--
     <script type="text/javascript" src="../static/js/tableExport.js"></script>
     <script type="text/javascript" src="../static/js/jquery.base64.js"></script>
     -->
-    <script type="text/javascript" src="../static/js/js-xlsx/xlsx.core.min.js"></script>
-    <script type="text/javascript" src="../static/js/FileSaver/FileSaver.min.js"></script>
-    <script type="text/javascript" src="../static/js/jsPDF/jspdf.min.js"></script>
-    <script type="text/javascript" src="../static/js/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+    <script type="text/javascript" src="../static/js/xlsx.core.min.js"></script>
+    <script type="text/javascript" src="../static/js/FileSaver.min.js"></script>
+    <script type="text/javascript" src="../static/js/jspdf.min.js"></script>
+    <script type="text/javascript" src="../static/js/jspdf.plugin.autotable.js"></script>
     <script type="text/javascript" src="../static/js/html2canvas.min.js"></script>
     <script type="text/javascript" src="../static/js/tableExport_hhurz.js"></script>
     <script type="text/javascript">
-        $(function(){
+        // HTML5
+         window.onload = function () {
+            // domContentLoadedEventEnd：返回当前网页所有需要执行的脚本执行完成时的Unix毫秒时间戳。
+            // navigationStart: 当前浏览器窗口的前一个网页关闭，发生unload事件时的Unix毫秒时间戳。如果没有前一个网页，则等于fetchStart属性。
+            // fetchStart：返回浏览器准备使用HTTP请求读取文档时的Unix毫秒时间戳。该事件在网页查询本地缓存之前发生。
+            var loadTime = (window.performance.timing.domContentLoadedEventEnd-window.performance.timing.navigationStart)/1000;
+            window.status = "You Page Load took  " + loadTime + " seconde(s).";
+            document.getElementById("loadingtime").innerHTML = "<font color='red'>(You Page Load took " + loadTime + " seconde(s).)</font>";
+
+            // document.getElementById("stats_datatable").dataTable({
+            //     "pagingType": "full_numbers"
+            // });
+        }
+
+        // beforeload = (new Date()).getTime();
+        // function pageloadingtime() {
+        //     afterload = (new Date()).getTime();
+        //     secondes = (afterload - beforeload) / 1000;
+        //     window.status = 'You Page Load took  ' + secondes + ' seconde(s).';
+        //     document.getElementById("loadingtime").innerHTML = "<font color='red'>(You Page Load took " + secondes + " seconde(s).)</font>";
+        // }
+        // window.onload = pageloadingtime
+
+        $(function() {
+            $("input[type='radio']").click(function(){
+                switch ($(this).val()) {
+                case "dt_clt":
+                    $("#stats_datatable").children("tbody").append(
+                            "{% for r in res %}"
+                          + "<tr>"
+                          {# +     "<td>{{ loop.index }}</td>" #}
+                          +     "{% for c in r %}"
+                          +         "<td{% if loop.index == 5 %} align='right'{% endif %}>"
+                          +             "{% if loop.index == 5 %}{{ '%.2f'|format(c|float) }}{% else %}{{ c }}{% endif %}"
+                          +         "</td>"
+                          +     "{% endfor %}"
+                          + "</tr>"
+                          + "{% endfor%}");
+                    $("#stats_datatable").dataTable();
+                    break;
+
+                case "dt_svr":
+                    $("#stats_datatable").dataTable({
+                        "orderClasses": true,   // 高亮显示表格中排序的列。
+                        "pageLength": 25,       // 初始化页长度（每页多少条数据）。
+                        "processing": true,     // 是否显示处理状态(排序的时候，数据很多耗费时间长的话，也会显示这个)。
+                        "serverSide": true,     // 是否开启服务器模式
+                        "searching": false,     // 关闭全局搜索
+                        "ajax": {
+                            url: "{{ url_for('main.data') }}",
+                            type: "POST",
+                            data: {
+                                'col_cnt': 7,   // 列数，可以考虑把排序列信息传过去：[(0, "asc"), (1, "desc")]
+                            }
+                        }
+                    });
+                    break;
+
+                case "sa_svr":
+                    alert("SQLAlchemy paginate");
+                    break;
+
+                default:
+                    break;
+                }
+
+                // 刷新当前页面
+                // window.location.reload();
+                // // 刷新父亲对象（用于框架）
+                // parent.location.reload();
+                // // 刷新父窗口对象（用于单开窗口）
+                // opener.location.reload();
+                // // 刷新最顶端对象（用于多开窗口）
+                // top.location.reload();
+            });
+
             $("#front_export_xls").click(function(){
                 var name=prompt("请输入文件名", "NewFile");
                 $("#stats_datatable").tableExport({
@@ -65,33 +143,67 @@
     </script>
 </head>
 <body>
-    <button type="button">&#10004;</button>
-    <button type="button">&#10006;</button>
-    <button type="button">&#10084;</button>
-    <button type="button">&#9813;</button>
-    <button type="button">print</button>
-    <button type="button" id="front_export_xls">front export xls</button>
-    <button type="button" id="front_export_pdf">front export pdf</button>        
-    <table id="stats_datatable">
-        <tr>
-            <th>#</th>
-            <th>商品序号</th>
-            <th>商品名称</th>
-            <th>设备序号</th>
-            <th>柜台名称</th>
-            <th>销售数量</th>
-            <th>销售金额</th>
-        </tr>
-        {% for r in res %}
-        <tr>
-            <td>{{ loop.index }}</td>
-            {% for c in r %}
-            <td{% if loop.index == 5 or loop.index == 6 %} align="right"{% endif %}>
-                {% if loop.index == 6 %}{{ "%.2f"|format(c|float) }}{% else %}{{ c }}{% endif %}
-            </td>
-            {% endfor %}
-        </tr>
-        {% endfor%}
-    </table>
+    <div>
+        <button type="button">&#10004;</button>
+        <button type="button">&#10006;</button>
+        <button type="button">&#10084;</button>
+        <button type="button">&#9813;</button>
+        <button type="button">print</button>
+        <button type="button" id="front_export_xls">front export xls</button>
+        <button type="button" id="front_export_pdf">front export pdf</button>
+    </div>
+    <div>
+        <p id="loadingtime"></p>
+    </div>
+    <div>
+        <input type="radio" checked="checked" name="datatables" value="dt_clt" />
+        DataTables Client-side processing
+        <br />
+        <input type="radio" name="datatables" value="dt_svr" />
+        DataTables Server-side processing
+        <br />
+        <input type="radio" name="datatables" value="sa_svr" />
+        SQLAlchemy paginate
+    </div>
+    <div style="margin-top: 30px;">
+        <table id="stats_datatable" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <!-- <th>#</th> -->
+                    <th>商品编号</th>
+                    <th>商品名称</th>
+                    <th>订货数量</th>
+                    <th>实入数量</th>
+                    <th>单价</th>
+                    <th>订货日期</th>
+                    <th>操作员</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <!-- <th>#</th> -->
+                    <th>商品编号</th>
+                    <th>商品名称</th>
+                    <th>订货数量</th>
+                    <th>实入数量</th>
+                    <th>单价</th>
+                    <th>订货日期</th>
+                    <th>操作员</th>
+                </tr>
+            </tfoot>
+            <tbody>
+{#                {% for r in res %}#}
+{#                <tr>#}
+{#                    <td>{{ loop.index }}</td>#}
+{#                    {% for c in r %}#}
+{#                    <td{% if loop.index == 5 %} align="right"{% endif %}>#}
+{#                        {% if loop.index == 5 %}{{ "%.2f"|format(c|float) }}{% else %}{{ c }}{% endif %}#}
+{#                    </td>#}
+{#                    {% endfor %}#}
+{#                </tr>#}
+{#                {% endfor%}#}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
