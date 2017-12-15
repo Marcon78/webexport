@@ -18,7 +18,22 @@ def index():
 
     # s = db_session()
     # res = s.execute("SELECT * FROM tbl_saleinfo;").fetchall()
-    res = db.session.execute("SELECT * FROM tbl_purchaseinfo LIMIT(50);").fetchall();
+    # res = db.session.execute(
+    #     """SELECT
+    #            (SELECT COUNT(*)
+    #             FROM tbl_purchaseinfo AS t2
+    #             WHERE t2.CommodityNo < t1.CommodityNo
+    #            ) + (
+    #            SELECT COUNT(*)
+    #            FROM tbl_purchaseinfo AS t3
+    #            WHERE t3.name = t1.name
+    #              AND t3.id < t1.id
+    #            ) + 1 AS rowNum,
+    #            *
+    #        FROM tbl_purchaseinfo AS t1
+    #        ORDER BY t1.CommodityNo ASC
+    #        LIMIT(50);""").fetchall();
+    res = db.session.execute("SELECT '', * FROM tbl_purchaseinfo LIMIT(100);").fetchall()
     return render_template("index.html", res=res)
 
 
@@ -44,7 +59,7 @@ def data():
     front_dt_search_val = request.form.get("search[value]")
     # 如果为 true代表全局搜索的值是作为正则表达式处理，为 false则不是。 注意：通常在服务器模式下对于大数据不执行这样的正则表达式，但这都是自己决定的。
     front_dt_search_regx = request.form.get("search[regex]")
-    front_dt_order_cnt = request.form.get("col_cnt")
+    front_dt_column_cnt = request.form.get("col_cnt")
     # order[i][column]
     # order[i][dir]
 
@@ -53,7 +68,12 @@ def data():
     #
     filter_params = ""
     order_params = ""
-    res = db.session.execute("SELECT * FROM tbl_purchaseinfo LIMIT(" + front_dt_length + ") OFFSET " + front_dt_start + ";").fetchall();
+    for x in range(int(front_dt_column_cnt)):
+        if request.form.get("order["+str(x)+"][column]"):
+            order_params += request.form.get("order["+str(x)+"][column]")
+        if request.form.get("order["+str(x)+"][dir]"):
+            order_params += " " + request.form.get("order["+str(x)+"][dir]") + ","
+    res = db.session.execute("SELECT '', * FROM tbl_purchaseinfo LIMIT(" + front_dt_length + ") OFFSET " + front_dt_start + ";").fetchall();
     back_dt = {
         # 必要！Datatables发送的draw是多少，则服务器返回多少。
         # 注意！！！出于安全的考虑，强烈要求把这个转换为整形，即数字后再返回，而不是纯粹的接受然后返回，目的是防止跨站脚本（XSS）攻击。
@@ -80,6 +100,8 @@ def data():
     # 自动绑定数据到 tr上，使用 jQuery.attr() 方法，对象的键用作属性，值用作属性的值。注意这个 需要 Datatables 1.10.5+的版本才支持。object。
     # DT_RowAttr
 
-    return jsonify(back_dt)
+    # jsonify的作用实际上就是将传入的json形式数据序列化成为json字符串，作为响应的body，并且设置响应的Content-Type为application/json，构造出响应返回至客户端。
+    # 直接返回json.dumps的结果是可行的，因为flask会判断并使用make_response方法自动构造出响应，只不过响应头各个字段是默认的。
+    # 若要自定义响应字段，则可以使用make_response或Response自行构造响应。
 
-    
+    return jsonify(back_dt)

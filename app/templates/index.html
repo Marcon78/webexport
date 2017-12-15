@@ -6,20 +6,22 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <link rel="stylesheet" href="http://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
-    <!-- <style type="text/css">
+    <!--
+    <style type="text/css">
         body { padding:0; margin:0; font:normal 12px/24px "\5B8B\4F53"; color:#444; }
         table { width:800px; border:0; margin:100px auto 0; border-collapse:collapse; border-spacing:0;}
         table th { background:#0090D7; font-weight:normal; text-align:center; line-height:30px; font-size:14px; color:#FFF;}
         table tr:nth-child(odd) { background:#F4F4F4; }
-        /* table td:nth-child(even) { color:#C00; } */
-        /* table tr:nth-child(5) { background:#73B1E0; color:#FFF; } */
+        table td:nth-child(even) { color:#C00; }
+        table tr:nth-child(5) { background:#73B1E0; color:#FFF; }
         table tr:hover { background:#73B1E0; color:#FFF; }
         table td, table th { border:1px solid #EEE; }
         button:hover,
         button:active {
             outline: 0;
         }
-    </style> -->
+    </style>
+    -->
     <script type="text/javascript" src="../static/js/jquery-3.2.1.js"></script>
     <script type="text/javascript" src="../static/js/jquery.dataTables.js"></script>
     <!-- <script type="text/javascript" src="http://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script> -->
@@ -72,24 +74,60 @@
                           +     "{% endfor %}"
                           + "</tr>"
                           + "{% endfor%}");
-                    $("#stats_datatable").dataTable();
+                    var t = $("#stats_datatable").dataTable({
+                                    "fnDrawCallback": function(){
+                                        var api = this.api();
+                                        //var startIndex= api.context[0]._iDisplayStart;    // 获取到本页开始的条数
+                                        api.column(0).nodes().each(function(cell, i) {
+                                            //cell.innerHTML = startIndex + i + 1;
+                                            cell.innerHTML = i + 1;
+                                        });
+                                    }});
                     break;
 
                 case "dt_svr":
-                    $("#stats_datatable").dataTable({
-                        "orderClasses": true,   // 高亮显示表格中排序的列。
-                        "pageLength": 25,       // 初始化页长度（每页多少条数据）。
-                        "processing": true,     // 是否显示处理状态(排序的时候，数据很多耗费时间长的话，也会显示这个)。
-                        "serverSide": true,     // 是否开启服务器模式
-                        "searching": false,     // 关闭全局搜索
-                        "ajax": {
-                            url: "{{ url_for('main.data') }}",
-                            type: "POST",
-                            data: {
-                                'col_cnt': 7,   // 列数，可以考虑把排序列信息传过去：[(0, "asc"), (1, "desc")]
-                            }
-                        }
+                    var t = $("#stats_datatable").dataTable({
+                                "orderClasses": true,   // 高亮显示表格中排序的列。
+                                "pageLength": 10,       // 初始化页长度（每页多少条数据）。
+                                "processing": true,     // 是否显示处理状态(排序的时候，数据很多耗费时间长的话，也会显示这个)。
+                                "serverSide": true,     // 是否开启服务器模式
+                                "searching": false,     // 关闭全局搜索
+                                "ajax": {
+                                    url: "{{ url_for('main.data') }}",
+                                    type: "POST",
+                                    data: {
+                                        'col_cnt': 7,   // 列数，可以考虑把排序列信息传过去：[(0, "asc"), (1, "desc")]
+                                    }
+                                },
+                                "fnDrawCallback": function(){
+                                    var api = this.api();
+                                    var startIndex= api.context[0]._iDisplayStart;  // 获取到本页开始的条数
+                                    api.column(0).nodes().each(function(cell, i) {
+                                        cell.innerHTML = startIndex + i + 1;
+                                    });
+                                }
+                            });
+                    /*
+                    t.on("draw.dt",function() {
+                        t.column(0, {
+                                search: "applied",
+                                order: "applied"
+                           }).nodes().each(function(cell, i) {
+                                // i 从 0 开始，所以这里先加 1。
+                                i = i+1;
+                                // 服务器模式下获取分页信息，使用 DT 提供的 API 直接获取分页信息。
+                                var page = t.page.info();
+                                // 当前第几页，从 0 开始。
+                                var pageno = page.page;
+                                // 每页数据
+                                var length = page.length;
+                                // 行号等于：页数*每页数据长度+行号
+                                var columnIndex = (i+pageno*length);
+                                alert(columnIndex);
+                                cell.innerHTML = columnIndex;
+                            });
                     });
+                    */
                     break;
 
                 case "sa_svr":
@@ -169,7 +207,7 @@
         <table id="stats_datatable" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
-                    <!-- <th>#</th> -->
+                    <th>#</th>
                     <th>商品编号</th>
                     <th>商品名称</th>
                     <th>订货数量</th>
@@ -181,7 +219,7 @@
             </thead>
             <tfoot>
                 <tr>
-                    <!-- <th>#</th> -->
+                    <th>#</th>
                     <th>商品编号</th>
                     <th>商品名称</th>
                     <th>订货数量</th>
@@ -192,16 +230,6 @@
                 </tr>
             </tfoot>
             <tbody>
-{#                {% for r in res %}#}
-{#                <tr>#}
-{#                    <td>{{ loop.index }}</td>#}
-{#                    {% for c in r %}#}
-{#                    <td{% if loop.index == 5 %} align="right"{% endif %}>#}
-{#                        {% if loop.index == 5 %}{{ "%.2f"|format(c|float) }}{% else %}{{ c }}{% endif %}#}
-{#                    </td>#}
-{#                    {% endfor %}#}
-{#                </tr>#}
-{#                {% endfor%}#}
             </tbody>
         </table>
     </div>
