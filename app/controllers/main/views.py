@@ -33,7 +33,7 @@ def index():
     #        FROM tbl_purchaseinfo AS t1
     #        ORDER BY t1.CommodityNo ASC
     #        LIMIT(50);""").fetchall();
-    res = db.session.execute("SELECT '', * FROM tbl_purchaseinfo LIMIT(100);").fetchall()
+    res = db.session.execute("SELECT '', * FROM tbl_purchaseinfo LIMIT(5000);").fetchall()
     return render_template("index.html", res=res)
 
 
@@ -46,6 +46,10 @@ def data():
                   # Column('primary_key', Integer),
                   # Column('other_column', Integer)  # just to illustrate
                   )
+
+    # 定义列名
+    CONST_COLS = ["#", "CommodityNo", "CommodityName", "Quantity", "RQuantity", "Price", "MakeDate", "Maker"]
+
     ####
     # DataTables 发送到服务器的参数
     #
@@ -69,11 +73,18 @@ def data():
     filter_params = ""
     order_params = ""
     for x in range(int(front_dt_column_cnt)):
-        if request.form.get("order["+str(x)+"][column]"):
-            order_params += request.form.get("order["+str(x)+"][column]")
-        if request.form.get("order["+str(x)+"][dir]"):
-            order_params += " " + request.form.get("order["+str(x)+"][dir]") + ","
-    res = db.session.execute("SELECT '', * FROM tbl_purchaseinfo LIMIT(" + front_dt_length + ") OFFSET " + front_dt_start + ";").fetchall();
+        ord_idx = request.form.get("order["+str(x)+"][column]")
+        ord_dir = request.form.get("order["+str(x)+"][dir]")
+        if ord_idx and ord_dir:
+            order_params += CONST_COLS[int(ord_idx)] + " " + ord_dir + ","
+    if order_params:
+        order_params = order_params[:-1]
+    sql_txt = """SELECT '', *
+                 FROM tbl_purchaseinfo """\
+              + ("""ORDER BY """ + order_params if order_params else """""")\
+              + """ LIMIT(""" + front_dt_length + """)
+                   OFFSET """ + front_dt_start + """;"""
+    res = db.session.execute(sql_txt).fetchall()
     back_dt = {
         # 必要！Datatables发送的draw是多少，则服务器返回多少。
         # 注意！！！出于安全的考虑，强烈要求把这个转换为整形，即数字后再返回，而不是纯粹的接受然后返回，目的是防止跨站脚本（XSS）攻击。
@@ -103,5 +114,4 @@ def data():
     # jsonify的作用实际上就是将传入的json形式数据序列化成为json字符串，作为响应的body，并且设置响应的Content-Type为application/json，构造出响应返回至客户端。
     # 直接返回json.dumps的结果是可行的，因为flask会判断并使用make_response方法自动构造出响应，只不过响应头各个字段是默认的。
     # 若要自定义响应字段，则可以使用make_response或Response自行构造响应。
-
     return jsonify(back_dt)

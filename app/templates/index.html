@@ -75,6 +75,14 @@
                           + "</tr>"
                           + "{% endfor%}");
                     var t = $("#stats_datatable").dataTable({
+                                    // 由于第 0 列是行号，排序和搜索没有意义，所以禁用第 0 列的搜索和排序。
+                                    "columnDefs": [{
+                                        "searchable": false,
+                                        "orderable": false,
+                                        "targets": 0
+                                    }],
+                                    // 因为 DT 默认会设置第 0 列升序排列。由于前面已经禁用，因此改为设置默认的排序列为第 1 列。
+                                    "order": [[1, 'asc']],
                                     "fnDrawCallback": function(){
                                         var api = this.api();
                                         //var startIndex= api.context[0]._iDisplayStart;    // 获取到本页开始的条数
@@ -92,11 +100,41 @@
                                 "processing": true,     // 是否显示处理状态(排序的时候，数据很多耗费时间长的话，也会显示这个)。
                                 "serverSide": true,     // 是否开启服务器模式
                                 "searching": false,     // 关闭全局搜索
+                                //"columns":[
+                                //    { "data":null },
+                                //    { "data":"CommodityNo" },
+                                //    { "data":"CommoityName" },
+                                //    { "data":"Quantity" },
+                                //    { "data":"Rquantity" },
+                                //    { "data":"Price" },
+                                //    { "data":"MakeDate" },
+                                //    { "data":"Maker" }
+                                //],
+                                // 由于第 0 列是行号，排序和搜索没有意义，所以禁用第 0 列的搜索和排序。
+                                "columnDefs": [{
+                                    "searchable": false,
+                                    "orderable": false,
+                                    "targets": 0
+                                }],
+                                // 因为 DT 默认会设置第 0 列升序排列。由于前面已经禁用，因此改为设置默认的排序列为第 1 列。
+                                "order": [[1, 'asc']],
                                 "ajax": {
                                     url: "{{ url_for('main.data') }}",
                                     type: "POST",
                                     data: {
                                         'col_cnt': 7,   // 列数，可以考虑把排序列信息传过去：[(0, "asc"), (1, "desc")]
+                                    }
+                                },
+                                "language": {
+                                    "lengthMenu": "每页_MENU_ 条记录",
+                                    "zeroRecords": "没有找到记录",
+                                    "info": "第 _PAGE_ 页 ( 总共 _PAGES_ 页 )",
+                                    "infoEmpty": "无记录",
+                                    "search": "搜索：",
+                                    "infoFiltered": "(从 _MAX_ 条记录过滤)",
+                                    "paginate": {
+                                        "previous": "上一页",
+                                        "next": "下一页"
                                     }
                                 },
                                 "fnDrawCallback": function(){
