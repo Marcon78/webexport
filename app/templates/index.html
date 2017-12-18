@@ -190,30 +190,33 @@
                 var name=prompt("请输入文件名", "NewFile");
                 $("#stats_datatable").tableExport({
                     type:'excel',
-                    excelFileFormat:'xmlss',
+                    //excelFileFormat:'xmlss',
                     escape:'false',
                     fileName: name
                 });
             });
 
             $("#front_export_pdf").click(function(){
-                var name=prompt("请输入文件名", "NewFile");
-                // $("#stats_datatable").tableExport({
-                //     type:'pdf',
-                //     jspdf: {
-                //         orientation: 'p',
-                //         margins: {left:20, top:10},
-                //         autotable: false
-                //     }
-                // });
-                $("#stats_datatable").tableExport({
-                    type: 'pdf',
-                    jspdf: {
-                        orientation: 'l',
-                        margins: {right: 10, left: 10, top: 40, bottom: 40},
-                        autotable: {tableWidth: 'auto'}
-                    }
-                });
+                //var name=prompt("请输入文件名", "NewFile");
+                //$("#stats_datatable").tableExport({
+                //    type:'pdf',
+                //    jspdf: {
+                //        orientation: 'p',
+                //        margins: {left:20, top:10},
+                //        autotable: false
+                //    }
+                //});
+                //$("#stats_datatable").tableExport({
+                //    type: 'pdf',
+                //    jspdf: {
+                //        //orientation: 'l',
+                //        orientation: 'p',
+                //        margins: {right: 10, left: 10, top: 40, bottom: 40},
+                //        //autotable: {tableWidth: 'auto'}
+                //        autotable: false
+                //    },
+                //    fileName: name
+                //});
             });
         });
     </script>
