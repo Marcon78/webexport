@@ -163,6 +163,7 @@ def export1():
     t0 = time.clock()
 
     # https://bitbucket.org/openpyxl/openpyxl/src
+    # http://openpyxl.readthedocs.io/en/default/
     from openpyxl import Workbook
     from openpyxl.writer.excel import save_virtual_workbook
     # # from openpyxl.writer.excel import ExcelWriter
@@ -225,14 +226,13 @@ def export1():
 
     # wb.save("new_big_file.xlsx")
     # ew = ExcelWriter(workbook=wb)
-    # response = make_response(send_file("..//new_big_file.xlsx"))
+    # response = make_response(send_file("..//new_big_file1.xlsx"))
     response = make_response(save_virtual_workbook(wb))
     response.headers["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     response.headers["Content-Disposition"] = "attachment; filename=new_big_file1.xlsx;"
 
     t = time.clock() - t0
     print(t)
-
     return response
 
 
@@ -248,13 +248,12 @@ def export2():
     for r in res:
         data.append(list(r))
     sheet = pe.Sheet(data)
-    response = make_response(sheet.xlsx)
-    response.headers["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    response.headers["Content-Disposition"] = "attachment; filename=new_big_file2.xlsx;"
+    response = make_response(sheet.csv)
+    response.headers["Content-type"] = "text/csv"
+    response.headers["Content-Disposition"] = "attachment; filename=new_big_file2.csv;"
 
     t = time.clock() - t0
     print(t)
-
     return response
 
 
@@ -283,7 +282,7 @@ def export3():
         row += 1
 
     bio = BytesIO()
-    wb.save(bio)   #这点很重要，传给save函数的不是保存文件名，而是一个StringIO流
+    wb.save(bio)   # 这点很重要，传给save函数的不是保存文件名，而是一个StringIO流
     response = make_response(bio.getvalue())
     response.headers["Content-type"] = "application/vnd.ms-excel"   # 指定返回的类型
     # response.headers["Transfer-Encoding"] = "chunked"
@@ -305,9 +304,33 @@ def export4():
     data = tablib.Dataset(*list(res), headers=titles)
     response = make_response(data.xlsx)
     response.headers["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    response.headers["Content-Disposition"] = "attachment; filename=new_big_file2.xlsx;"
+    response.headers["Content-Disposition"] = "attachment; filename=new_big_file4.xlsx;"
 
     t = time.clock() - t0
     print(t)
+    return response
 
+
+@main.route("/export5", methods=["GET"])
+def export5():
+    t0 = time.clock()
+
+    # https://github.com/pyexcel/pyexcel-xlsx
+    from collections import OrderedDict
+    from pyexcel_xlsx import save_data
+    from io import BytesIO
+    data = OrderedDict()
+    titles = ["CommodityNo", "CommodityName", "Quantity", "RealQuantity", "Price", "MakeDate", "Maker"]
+    data.update({"统计": titles})
+    res = db.session.execute("SELECT * FROM tbl_purchaseinfo;").fetchall()
+    data.update({"统计": [list(r) for r in res]})
+    io = BytesIO()
+    save_data(io, data)
+
+    response = make_response(io.getvalue())
+    response.headers["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    response.headers["Content-Disposition"] = "attachment; filename=new_big_file5.xlsx;"
+
+    t = time.clock() - t0
+    print(t)
     return response

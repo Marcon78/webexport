@@ -5,26 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <link rel="stylesheet" href="http://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
-    <!--
-    <style type="text/css">
-        body { padding:0; margin:0; font:normal 12px/24px "\5B8B\4F53"; color:#444; }
-        table { width:800px; border:0; margin:100px auto 0; border-collapse:collapse; border-spacing:0;}
-        table th { background:#0090D7; font-weight:normal; text-align:center; line-height:30px; font-size:14px; color:#FFF;}
-        table tr:nth-child(odd) { background:#F4F4F4; }
-        table td:nth-child(even) { color:#C00; }
-        table tr:nth-child(5) { background:#73B1E0; color:#FFF; }
-        table tr:hover { background:#73B1E0; color:#FFF; }
-        table td, table th { border:1px solid #EEE; }
-        button:hover,
-        button:active {
-            outline: 0;
-        }
-    </style>
-    -->
+    <link rel="stylesheet" href="../static/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/custom.css">
     <script type="text/javascript" src="../static/js/jquery-3.2.1.js"></script>
     <script type="text/javascript" src="../static/js/jquery.dataTables.js"></script>
-    <!-- <script type="text/javascript" src="http://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script> -->
     <!--
     <script type="text/javascript" src="../static/js/tableExport.js"></script>
     <script type="text/javascript" src="../static/js/jquery.base64.js"></script>
@@ -35,9 +20,10 @@
     <script type="text/javascript" src="../static/js/jspdf.plugin.autotable.js"></script>
     <script type="text/javascript" src="../static/js/html2canvas.min.js"></script>
     <script type="text/javascript" src="../static/js/tableExport_hhurz.js"></script>
+    <script type="text/javascript" src="../static/js/custom.js"></script>
     <script type="text/javascript">
         // HTML5
-         window.onload = function () {
+        window.onload = function () {
             // domContentLoadedEventEnd：返回当前网页所有需要执行的脚本执行完成时的Unix毫秒时间戳。
             // navigationStart: 当前浏览器窗口的前一个网页关闭，发生unload事件时的Unix毫秒时间戳。如果没有前一个网页，则等于fetchStart属性。
             // fetchStart：返回浏览器准备使用HTTP请求读取文档时的Unix毫秒时间戳。该事件在网页查询本地缓存之前发生。
@@ -59,7 +45,34 @@
         // }
         // window.onload = pageloadingtime
 
+        function DropDown(el) {
+            this.dd = el;
+            this.initEvents();
+        }
+        DropDown.prototype = {
+            initEvents : function() {
+                var obj = this;
+
+                obj.dd.on('click', function(event){
+                    $(this).toggleClass('active');
+                    event.stopPropagation();
+                });
+            }
+        }
+
+        function SvrExportXlsxClick() {
+            alert("click");
+        }
+
         $(function() {
+            var dd = new DropDown( $('#dd') );
+
+            $(document).click(function() {
+                // all dropdowns
+                $('.wrapper-dropdown-5').removeClass('active');
+            });
+
+
             $("input[type='radio']").click(function(){
                 switch ($(this).val()) {
                 case "dt_clt":
@@ -218,10 +231,50 @@
                 //    fileName: name
                 //});
             });
+
+            $("ul[class='dropdown'] li a").click(function(){
+                switch ($(this).text()) {
+                case "OpenPyXL":
+                    $(location).attr("href", "{{ url_for('main.export1', next='/') }}");
+                    break;
+
+                case "PyExcel":
+                    $(location).attr("href", "{{ url_for('main.export2', next='/') }}");
+                    break;
+
+                case "PyExcel-xlsx":
+                    $(location).attr("href", "{{ url_for('main.export5', next='/') }}");
+                    break;
+
+                case "xlwt":
+                    $(location).attr("href", "{{ url_for('main.export3', next='/') }}");
+                    break;
+
+                case "tablib":
+                    $(location).attr("href", "{{ url_for('main.export4', next='/') }}");
+                    break;
+
+                default:
+                    break;
+                }
+            });
         });
     </script>
 </head>
 <body>
+    <section class="main">
+        <div class="wrapper-demo">
+            <div id="dd" class="wrapper-dropdown-5" tabindex="1">Excel Export On Server
+                <ul class="dropdown">
+                    <li><a href="javascript:void(0);"><i class="icon-save"></i>OpenPyXL</a></li>
+                    <li><a href="javascript:void(0);"><i class="icon-save"></i>PyExcel</a></li>
+                    <li><a href="javascript:void(0);"><i class="icon-save"></i>PyExcel-xlsx</a></li>
+                    <li><a href="javascript:void(0);"><i class="icon-save"></i>xlwt</a></li>
+                    <li><a href="javascript:void(0);"><i class="icon-save"></i>tablib</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
     <div>
         <button type="button">&#10004;</button>
         <button type="button">&#10006;</button>
@@ -244,7 +297,7 @@
         <input type="radio" name="datatables" value="sa_svr" />
         SQLAlchemy paginate
     </div>
-    <div style="margin-top: 30px;">
+    <div style="margin-top: 100px; margin-left: 10px; margin-right: 10px;">
         <table id="stats_datatable" class="display" cellspacing="0" width="100%">
             <thead>
                 <tr>
