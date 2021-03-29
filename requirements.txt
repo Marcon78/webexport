@@ -81,7 +81,7 @@ pyexcel==0.5.6
 pyexcel-io==0.5.4
 pyexcel-webio==0.1.4
 pyexcel-xlsx==0.5.4
-Pygments==2.2.0
+Pygments==2.7.4
 pylint==1.7.2
 pymongo==3.5.0
 PyNaCl==1.1.2
